@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>租客QA 自動文字產生器</title>
-    <!-- 引入 LINE 官方 LIFF SDK（關鍵，不能刪） -->
     <script src="https://line-scdn.net"></script>
     <style>
         body { font-family: sans-serif; background-color: #f4f6f9; color: #333; padding: 15px; margin: 0; }
@@ -18,11 +17,15 @@
         .sub-box { background: #e8f0fe; padding: 12px; border-radius: 6px; margin-top: 8px; border-left: 4px solid #1a73e8; }
         .flex-group { display: flex; gap: 10px; }
         .flex-group div { flex: 1; }
-        button { width: 100%; background-color: #1a73e8; color: white; border: none; padding: 10px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; }
-        button:hover { background-color: #1557b0; }
-        .send-btn { width: 100%; background-color: #34a853; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; }
-        .send-btn:hover { background-color: #2b8a43; }
+        .send-btn { width: 100%; background-color: #1a73e8; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+        .send-btn:hover { background-color: #1557b0; }
         .fixed-notice { background: #fff3cd; color: #856404; padding: 8px; border-radius: 4px; font-size: 12px; border-left: 4px solid #ffc107; }
+        
+        /* 結果區塊樣式優化 */
+        .result-box { margin-top: 20px; background: #e8f0fe; border: 2px solid #1a73e8; padding: 15px; border-radius: 6px; }
+        .result-title { font-weight: bold; color: #1a73e8; margin-bottom: 8px; font-size: 14px; }
+        .result-area { width: 100%; background: #fff; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 14px; line-height: 1.5; font-family: inherit; }
+        .action-btn { width: 100%; background-color: #34a853; color: white; border: none; padding: 10px; font-size: 14px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -171,18 +174,3 @@
         <div class="fixed-notice">
             📅 最短1年｜💰 押2<br>
             【資格】連帶保證人、身分證驗證、八大限制、禁菸
-        </div>
-    </div>
-
-    <!-- ⚠️ 特殊注意事項 -->
-    <div class="form-group">
-        <label>⚠️ 特殊注意事項 (簡答格)</label>
-        <textarea id="specialNotes" rows="2" placeholder="如有其他特殊交代事項請填寫於此..."></textarea>
-    </div>
-
-    <!-- 🚀 綠色火箭發送按鈕 -->
-    <button class="send-btn" onclick="sendToLine()">🚀 填寫完畢，直接傳送</button>
-</div>
-
-<script>
-    // 初始化 LINE LIFF 工具
