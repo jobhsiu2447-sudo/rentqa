@@ -3,172 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>租客QA 自動文字產生器</title>
-    <!-- 引入 LINE 官方 LIFF SDK -->
+    <title>【砌基租賃】租客QA產生器</title>
     <script src="https://line-scdn.net"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f4f6f9; color: #333; padding: 15px; margin: 0; }
-        .container { max-width: 100%; background: #fff; margin: 0 auto; padding: 20px; border-radius: 8px; box-sizing: border-box; }
-        h2 { text-align: center; color: #1a73e8; margin-bottom: 5px; font-size: 20px; }
-        .top-notice { text-align: center; font-weight: bold; color: #d93025; background-color: #fce8e6; padding: 8px; border-radius: 4px; margin-bottom: 20px; font-size: 14px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
-        input[type="text"], input[type="date"], input[type="time"], select, textarea { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
-        .radio-group, .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin: 5px 0; }
-        .radio-item, .checkbox-item { background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 13px; }
-        .sub-box { background: #e8f0fe; padding: 12px; border-radius: 6px; margin-top: 8px; border-left: 4px solid #1a73e8; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f4f6f9; color: #333; padding: 15px; margin: 0; }
+        .container { max-width: 500px; margin: 0 auto; box-sizing: border-box; }
+        .card-header { background: #ffffff; border-radius: 12px; padding: 25px 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .card-header::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background-color: #34a853; }
+        h2 { color: #202124; font-size: 22px; margin-top: 0; margin-bottom: 15px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .header-icon { color: #34a853; font-size: 24px; }
+        .top-description { font-size: 14px; line-height: 1.6; color: #5f6368; margin-bottom: 15px; }
+        .top-notice { background-color: #fef7e0; border: 1px solid #f0e6cc; color: #b06000; padding: 12px 15px; border-radius: 8px; font-size: 13px; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px; }
+        .form-card { background: #ffffff; border-radius: 12px; padding: 25px 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .section-title { font-size: 16px; font-weight: bold; color: #202124; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f3f4; padding-bottom: 10px; }
+        .form-group { margin-bottom: 22px; }
+        label { display: block; font-weight: bold; margin-bottom: 10px; font-size: 14px; color: #202124; }
+        input[type="text"], input[type="date"], input[type="time"], select, textarea { width: 100%; padding: 12px 15px; border: 1px solid #dadce0; border-radius: 6px; box-sizing: border-box; font-size: 14px; color: #3c4043; background-color: #ffffff; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #34a853; }
+        .radio-group, .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
+        .radio-item, .checkbox-item { background: #ffffff; border: 1px solid #dadce0; padding: 10px 16px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3c4043; }
+        .sub-box { background: #f1f8e9; padding: 15px; border-radius: 8px; margin-top: 12px; border-left: 4px solid #34a853; }
         .flex-group { display: flex; gap: 10px; }
         .flex-group div { flex: 1; }
-        
-        /* 廠商級綠色發送按鈕 */
-        .send-btn { width: 100%; background-color: #34a853; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+        .send-btn { width: 100%; background-color: #34a853; color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; margin-bottom: 20px; }
         .send-btn:hover { background-color: #2b8a43; }
-        .fixed-notice { background: #fff3cd; color: #856404; padding: 8px; border-radius: 4px; font-size: 12px; border-left: 4px solid #ffc107; }
-        
-        /* 終極備用黃色區塊 */
-        .result-box { margin-top: 20px; background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 6px; }
-        .result-title { font-weight: bold; color: #856404; margin-bottom: 10px; font-size: 14px; }
-        .result-textarea-block { width: 100%; background: #ffffff; padding: 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 15px; line-height: 1.6; color: #000; font-family: inherit; resize: none; box-sizing: border-box; }
-        .action-btn { width: 100%; background-color: #1a73e8; color: white; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 12px; }
+        .result-box { margin-top: 10px; margin-bottom: 40px; background: #fff3cd; border: 2px solid #ffc107; padding: 18px; border-radius: 12px; }
+        .result-title { font-weight: bold; color: #856404; margin-bottom: 12px; font-size: 14px; line-height: 1.4; }
+        .result-textarea-block { width: 100%; background: #ffffff; padding: 15px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 15px; line-height: 1.6; color: #000; font-family: inherit; resize: none; box-sizing: border-box; -webkit-user-select: text; user-select: text; }
+        .fixed-notice { background: #f8f9fa; color: #5f6368; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; border-left: 4px solid #dadce0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🏠 租客QA 自動文字產生器</h2>
-    <div class="top-notice">📢 請幫我更新到租屋使用表</div>
     
-    <!-- 1. 地址 -->
-    <div class="form-group">
-        <label>📍 物件地址 (簡答)</label>
-        <input type="text" id="propertyAddress" placeholder="請輸入該物件的完整地址">
-    </div>
-
-    <!-- 2. 型態 -->
-    <div class="form-group">
-        <label>🏢 房屋型態 (單選)</label>
-        <div class="radio-group">
-            <label class="radio-item"><input type="radio" name="houseType" value="套房" checked onclick="document.getElementById('typeOtherBox').style.display='none'"> 套房</label>
-            <label class="radio-item"><input type="radio" name="houseType" value="1房1廳" onclick="document.getElementById('typeOtherBox').style.display='none'"> 1房1廳</label>
-            <label class="radio-item"><input type="radio" name="houseType" value="2房1廳" onclick="document.getElementById('typeOtherBox').style.display='none'"> 2房1廳</label>
-            <label class="radio-item"><input type="radio" name="houseType" value="其他" onclick="document.getElementById('typeOtherBox').style.display='block'"> 其他</label>
-        </div>
-        <div id="typeOtherBox" class="sub-box" style="display: none;">
-            <label>請簡述其他型態名稱：</label>
-            <input type="text" id="typeOther" placeholder="請打字輸入...">
+    <!-- 頂部標題卡片 -->
+    <div class="card-header">
+        <h2><span class="header-icon">🏠</span>【砌基租賃】租客QA產生器</h2>
+        <div class="top-description">您好，此表單提供內部同仁快速填寫物件的 QA 條件，填寫完畢後將自動生成排版完美的複製文字。</div>
+        <div class="top-notice">
+            <span>📢</span>
+            <div>提示：填寫完點擊最下方按鈕即可生成文字，只要「輕點一下」下方出現的文字框，即可跳出 iPhone 的全選與複製！</div>
         </div>
     </div>
-
-    <!-- 📅 帶看時間 -->
-    <div class="form-group">
-        <label>📅 帶看時間</label>
-        <input type="date" id="visitDate">
-    </div>
-
-    <!-- ⚡ 電表類型 -->
-    <div class="form-group">
-        <label>⚡ 電表類型</label>
-        <select id="meterType">
-            <option value="一般：請租客月底要拍電錶">一般:請租客月底要拍電錶</option>
-            <option value="一般：小米監視器拍電錶">一般:小米監視器拍電錶</option>
-            <option value="雲端：儲值用電">雲端:儲值用電</option>
-        </select>
-    </div>
-
-    <!-- 💰 電費 (元/度) -->
-    <div class="form-group">
-        <label>💰 電費 (元/度)</label>
-        <input type="text" id="electricFee" value="5">
-    </div>
-
-    <!-- 📝 配套條件 -->
-    <div class="form-group">
-        <label>📝 配套條件 (可複選)</label>
-        <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="🏠 可租補"> 可租補</label>
-            <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="可入籍"> 可入籍</label>
-            <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="🐱 可貓"> 可貓</label>
-            <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="可報稅"> 可報稅</label>
+    
+    <!-- 卡片1：基本資訊 -->
+    <div class="form-card">
+        <div class="section-title">📍 物件基本資訊</div>
+        <div class="form-group">
+            <label>📍 物件地址 (簡答)</label>
+            <input type="text" id="propertyAddress" placeholder="請輸入該物件的完整地址">
         </div>
-    </div>
-
-    <!-- 🌐 網路類型 -->
-    <div class="form-group">
-        <label>🌐 網路類型</label>
-        <div class="radio-group">
-            <label class="radio-item"><input type="radio" name="netType" value="獨立網路" checked onclick="document.getElementById('netLabel').innerText='請輸入獨立網路速度 (Mbps)：'"> 獨立網路</label>
-            <label class="radio-item"><input type="radio" name="netType" value="共用網路" onclick="document.getElementById('netLabel').innerText='請輸入共用網路速度 (Mbps)：'"> 共用網路</label>
-        </div>
-        <div class="sub-box">
-            <label id="netLabel">請輸入獨立網路速度 (Mbps)：</label>
-            <input type="text" id="netSpeed" value="150 Mbps">
-        </div>
-    </div>
-
-    <!-- 🗑️ 垃圾處理方式 -->
-    <div class="form-group">
-        <label>🗑️ 垃圾處理方式</label>
-        <div class="radio-group">
-            <label class="radio-item"><input type="radio" name="trashType" value="垃圾代收" checked onclick="document.getElementById('trashBagBox').style.display='block'; document.getElementById('trashCarBox').style.display='none'"> 垃圾代收</label>
-            <label class="radio-item"><input type="radio" name="trashType" value="垃圾車自追" onclick="document.getElementById('trashBagBox').style.display='none'; document.getElementById('trashCarBox').style.display='block'"> 垃圾車自追</label>
-        </div>
-        
-        <!-- 垃圾代收 -->
-        <div id="trashBagBox" class="sub-box" style="display: block;">
-            <label>🔹 請選擇收集容器：</label>
-            <div class="radio-group" style="margin-bottom: 10px;">
-                <label class="radio-item"><input type="radio" name="trashContainerType" value="垃圾袋" checked> 垃圾袋</label>
-                <label class="radio-item"><input type="radio" name="trashContainerType" value="垃圾桶"> 垃圾桶</label>
+        <div class="form-group">
+            <label>🏢 房屋型態 (單選)</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="houseType" value="套房" checked onclick="document.getElementById('typeOtherBox').style.display='none'"> 套房</label>
+                <label class="radio-item"><input type="radio" name="houseType" value="1房1廳" onclick="document.getElementById('typeOtherBox').style.display='none'"> 1房1廳</label>
+                <label class="radio-item"><input type="radio" name="houseType" value="2房1廳" onclick="document.getElementById('typeOtherBox').style.display='none'"> 2房1廳</label>
+                <label class="radio-item"><input type="radio" name="houseType" value="其他" onclick="document.getElementById('typeOtherBox').style.display='block'"> 其他</label>
             </div>
-            <label>🔹 請勾選租客拿出垃圾的時間：</label>
+            <div id="typeOtherBox" class="sub-box" style="display: none;">
+                <label>請簡述其他型態名稱：</label>
+                <input type="text" id="typeOther" placeholder="請打字輸入...">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>📅 帶看時間</label>
+            <input type="date" id="visitDate">
+        </div>
+    </div>
+
+    <!-- 卡片2：費用條件 -->
+    <div class="form-card">
+        <div class="section-title">💰 費用與配套條件</div>
+        <div class="form-group">
+            <label>⚡ 電表類型</label>
+            <select id="meterType">
+                <option value="一般：請租客月底要拍電錶">一般:請租客月底要拍電錶</option>
+                <option value="一般：小米監視器拍電錶">一般:小米監視器拍電錶</option>
+                <option value="雲端：儲值用電">雲端:儲值用電</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>💰 電費 (元/度)</label>
+            <input type="text" id="electricFee" value="5">
+        </div>
+        <div class="form-group">
+            <label>📝 配套條件 (可複選)</label>
             <div class="checkbox-group">
-                <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="一" checked> 一</label>
-                <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="二"> 二</label>
-                <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="三"> 三</label>
-                <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="四" checked> 四</label>
-                <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="五"> 五</label>
-                <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="六"> 六</label>
-                <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="日"> 日</label>
+                <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="🏠 可租補"> 可租補</label>
+                <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="可入籍"> 可入籍</label>
+                <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="🐱 可貓"> 可貓</label>
+                <label class="checkbox-item"><input type="checkbox" class="condition-cb" value="可報稅"> 可報稅</label>
             </div>
         </div>
+        <div class="form-group">
+            <label>🌐 網路類型</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="netType" value="獨立網路" checked onclick="document.getElementById('netLabel').innerText='請輸入獨立網路速度 (Mbps)：'"> 獨立網路</label>
+                <label class="radio-item"><input type="radio" name="netType" value="共用網路" onclick="document.getElementById('netLabel').innerText='請輸入共用網路速度 (Mbps)：'"> 共用網路</label>
+            </div>
+            <div class="sub-box">
+                <label id="netLabel">請輸入獨立網路速度 (Mbps)：</label>
+                <input type="text" id="netSpeed" value="150 Mbps">
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片3：生活服務（已完美包覆與修復標籤） -->
+    <div class="form-card">
+        <div class="section-title">🗑️ 生活服務與優點</div>
         
-        <!-- 垃圾車自追 -->
-        <div id="trashCarBox" class="sub-box" style="display: none;">
-            <label>請輸入垃圾車資訊：</label>
-            <div class="flex-group">
-                <div>
-                    <span>📍 地址</span>
-                    <input type="text" id="trashCarLocation" value="明德路1段195巷口">
+        <div class="form-group">
+            <label>🗑️ 垃圾處理方式</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="trashType" value="垃圾代收" checked onclick="document.getElementById('trashBagBox').style.display='block'; document.getElementById('trashCarBox').style.display='none'"> 垃圾代收</label>
+                <label class="radio-item"><input type="radio" name="trashType" value="垃圾車自追" onclick="document.getElementById('trashBagBox').style.display='none'; document.getElementById('trashCarBox').style.display='block'"> 垃圾車自追</label>
+            </div>
+            
+            <!-- 垃圾代收子區域 -->
+            <div id="trashBagBox" class="sub-box" style="display: block;">
+                <label>🔹 請選擇收集容器：</label>
+                <div class="radio-group" style="margin-bottom: 10px;">
+                    <label class="radio-item"><input type="radio" name="trashContainerType" value="垃圾袋" checked> 垃圾袋</label>
+                    <label class="radio-item"><input type="radio" name="trashContainerType" value="垃圾桶"> 垃圾桶</label>
                 </div>
-                <div>
-                    <span>🕒 時間 (24H)</span>
-                    <input type="time" id="trashCarTime" value="14:35">
+                <label>🔹 請勾選租客拿出垃圾的時間：</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="一" checked> 一</label>
+                    <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="二"> 二</label>
+                    <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="三"> 三</label>
+                    <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="四" checked> 四</label>
+                    <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="五"> 五</label>
+                    <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="六"> 六</label>
+                    <label class="checkbox-item"><input type="checkbox" class="trash-day-cb" value="日"> 日</label>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- 📺 房東贈送 -->
-    <div class="form-group">
-        <label>📺 房東贈送 (可複選)</label>
-        <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" class="gift-cb" value="第四台" checked> 第四台</label>
-            <label class="checkbox-item"><input type="checkbox" class="gift-cb" value="水費" checked> 水費</label>
-            <label class="checkbox-item"><input type="checkbox" class="gift-cb" value="機車停車格"> 機車停車格</label>
-            <label class="checkbox-item"><input type="checkbox" class="gift-cb" value="汽車停車格"> 汽車停車格</label>
-            <label class="checkbox-item"><input type="checkbox" class="gift-cb" value="公共用電" checked> 公共用電</label>
-            <label class="checkbox-item"><input type="checkbox" class="gift-cb" value="公共飲水機"> 公共飲水機</label>
-        </div>
-    </div>
-
-    <!-- ✨ 房屋優點 -->
-    <div class="form-group">
-        <label>✨ 房屋優點 (可複選)</label>
-        <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" class="adv-cb" value="🧺 獨洗" checked> 獨洗</label>
-            <label class="checkbox-item"><input type="checkbox" class="adv-cb" value="☀️ 獨陽台" checked> 獨陽台</label>
-            <label class="checkbox-item"><input type="checkbox" class="adv-cb" value="🚰 濾水器"> 濾水器</label>
-            <label class="checkbox-item"><input type="checkbox" class="adv-cb" value="🥛 飲水機"> 飲水機</label>
-        </div>
-    </div>
-
+            
+            <!-- 垃圾車自追子區域 -->
+            <div id="trashCarBox" class="sub-box" style="display: none;">
+                <label>請輸入垃圾車資訊：</label>
+                <div class="flex-group">
+                    <div>
